@@ -1,6 +1,6 @@
 <?php
 
-namespace MqttBroadcastDriver;
+namespace Lanet\MqttWebsocketBroadcaster;
 
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Support\ServiceProvider;

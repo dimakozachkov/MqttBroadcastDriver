@@ -22,13 +22,13 @@
     },
     "autoload": {
         "psr-4": {
-            "MqttBroadcastDriver\\": "src/"
+            "Lanet\\MqttWebsocketBroadcaster\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "MqttBroadcastDriver\\MqttBroadcastServiceProvider"
+                "Lanet\\MqttWebsocketBroadcaster\\MqttBroadcastServiceProvider"
             ]
         }
     },
