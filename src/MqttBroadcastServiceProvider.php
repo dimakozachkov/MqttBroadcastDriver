@@ -1,6 +1,6 @@
 <?php
 
-namespace DmytroKozachkov\MqttBroadcast;
+namespace MqttBroadcastDriver;
 
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Support\ServiceProvider;

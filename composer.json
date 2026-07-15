@@ -22,13 +22,13 @@
     },
     "autoload": {
         "psr-4": {
-            "DmytroKozachkov\\MqttBroadcast\\": "src/"
+            "MqttBroadcastDriver\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "DmytroKozachkov\\MqttBroadcast\\MqttBroadcastServiceProvider"
+                "MqttBroadcastDriver\\MqttBroadcastServiceProvider"
             ]
         }
     },

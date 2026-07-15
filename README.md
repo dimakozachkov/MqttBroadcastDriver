@@ -43,10 +43,6 @@ MQTT_HOST=emqx
 MQTT_PORT=1883
 MQTT_USERNAME=
 MQTT_PASSWORD=
-
-# Used for channel auth signature generation/verification:
-REVERB_APP_KEY=your-app-key
-REVERB_APP_SECRET=your-app-secret
 ```
 
 ## Usage
@@ -72,12 +68,6 @@ Broadcast::channel('orders.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
 });
 ```
-
-## How It Works
-
-1. Laravel serializes the event and publishes it to the MQTT broker
-2. Subscribers (e.g. a WebSocket server) receive events from the corresponding MQTT topics
-3. Channel auth uses HMAC-SHA256 signatures (Pusher-compatible)
 
 ## MQTT Topic Mapping
 
