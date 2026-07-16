@@ -4,7 +4,6 @@ namespace Lanet\MqttWebsocketBroadcaster;
 
 use Illuminate\Broadcasting\Broadcasters\Broadcaster;
 use Illuminate\Broadcasting\BroadcastException;
-use Illuminate\Support\Facades\Log;
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
 
@@ -24,11 +23,20 @@ class MqttBroadcaster extends Broadcaster
         $this->appKey = $config['app_key'] ?? '';
         $this->appSecret = $config['app_secret'] ?? '';
 
+        // Empty strings must be null — otherwise php-mqtt sends credentials
+        // and EMQX may close the socket (dashboard login ≠ MQTT auth).
+        $username = $config['mqtt_username'] ?? null;
+        $password = $config['mqtt_password'] ?? null;
+        $username = ($username === '' || $username === null) ? null : $username;
+        $password = ($password === '' || $password === null) ? null : $password;
+
         $this->connectionSettings = (new ConnectionSettings())
-            ->setUsername($config['mqtt_username'] ?? null)
-            ->setPassword($config['mqtt_password'] ?? null)
+            ->setUsername($username)
+            ->setPassword($password)
             ->setKeepAliveInterval($config['keep_alive'] ?? 60)
-            ->setConnectTimeout($config['connect_timeout'] ?? 10);
+            ->setConnectTimeout($config['connect_timeout'] ?? 10)
+            ->setUseTls(false)
+            ->setReconnectAutomatically(false);
     }
 
     /**
@@ -140,13 +148,26 @@ class MqttBroadcaster extends Broadcaster
 
     protected function getConnection(): MqttClient
     {
-        if ($this->persistentClient !== null && $this->persistentClient->isConnected()) {
-            return $this->persistentClient;
+        if ($this->persistentClient !== null) {
+            try {
+                if ($this->persistentClient->isConnected()) {
+                    return $this->persistentClient;
+                }
+            } catch (\Throwable $e) {
+                // fall through to reconnect
+            }
+
+            try {
+                $this->persistentClient->disconnect();
+            } catch (\Throwable $e) {
+            }
+
+            $this->persistentClient = null;
         }
 
-        $clientId = 'laravel-' . gethostname() . '-' . getmypid();
+        $clientId = 'laravel-' . gethostname() . '-' . getmypid() . '-' . uniqid();
         $mqtt = new MqttClient($this->host, $this->port, $clientId);
-        $mqtt->connect($this->connectionSettings);
+        $mqtt->connect($this->connectionSettings, true);
 
         $this->persistentClient = $mqtt;
 
